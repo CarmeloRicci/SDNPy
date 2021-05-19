@@ -23,11 +23,11 @@ cd SDNPy
 python3 main.py
 
 cd /tmp
-rm -rf SDNPy-master
-wget https://github.com/CarmeloRicci/SDNPy/archive/master.zip
-unzip master.zip
-rm master.zip
-cd SDNPy-master
+rm -rf SDNPy-SDNWiMesh
+wget https://github.com/CarmeloRicci/SDNPy/archive/SDNWiMesh.zip
+unzip SDNWiMesh.zip
+rm SDNWiMesh.zip
+cd SDNPy-SDNWiMesh
 python3 main.py
 
 

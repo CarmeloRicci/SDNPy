@@ -8,9 +8,10 @@ from Packets import BeaconPacket
 from Packets import Packets
 import node_variables
 from configparser import ConfigParser
+import init_config
 config = ConfigParser()
-config.read('config.ini')
-
+config.read('/etc/SDNPy-SDNWiMesh/config.ini')
+ttl=1
 # --- Thread Receiver Udp Packets --- #
 class ThreadReceiverUdpPackets (threading.Thread):
    def __init__(self, threadID, name, port):
@@ -22,52 +23,79 @@ class ThreadReceiverUdpPackets (threading.Thread):
    def run(self):
        print("Starting " + self.name)
        #UdpSocketReceiver( config.get(socket.gethostname(),'IpStation') , int(config['GENERAL']['Port']) )
-       UdpSocketReceiver( self.port )
+       UdpSocketReceiverFromNode( self.port )
+       
 
-def UdpSocketReceiver(port):
-    bufferSize  = 1024
-    UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) # UDP
-    UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-    UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    UDPServerSocket.bind(("", port ))
-   #  UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-   #  UDPServerSocket.bind((localIP, localPort))
-    print("UDP server up and listening")
-    while(True):
-        bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-        message = bytesAddressPair[0]
-        address = bytesAddressPair[1]
-        PacketsHandler.PacketHandler(message, address)
+def UdpSocketReceiverFromNode(port):
+    # Create a UDP socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # Bind the socket to the port
+    server_address = (init_config.GetIp(config['GENERAL']['StationInterface']), port)
+    s.bind(server_address)
+   
+    while True:
+       print("####### Node is listening #######")
+       data, address = s.recvfrom(8192)
+       #s.setsockopt(socket.SOL_IP, socket.IP_TTL, ttl)
+       #print("\n\n 2. Node received: ", data.decode('utf-8'), "\n\n")
+       PacketsHandler.PacketHandler(data,address)
 
-        # clientMsg = "Message from Client:{}".format(message)
-        # clientIP  = "Client IP Address:{}".format(address)
-        # print(clientMsg)
-        # print(clientIP)
+
+class ThreadReceiverUdpPacketsFromController (threading.Thread):
+   def __init__(self, threadID, name,ip,port):
+      threading.Thread.__init__(self)
+      self.threadID = threadID
+      self.name = name
+      self.port = port
+      self.ip= ip
+
+   def run(self):
+       print("Starting " + self.name)
+       #UdpSocketReceiver( config.get(socket.gethostname(),'IpStation') , int(config['GENERAL']['Port']) )
+       UdpSocketReceiverFromController(self.ip, self.port )
+
+
+def UdpSocketReceiverFromController(ip,port):
+    # Create a UDP socket
+    #sC = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sC = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+    # Bind the socket to the port
+    #server_address = (ip, port)
+    sC.bind(('',port))
+
+
+
+    while True:
+       print("####### Node is listening #######")
+       data, address = sC.recvfrom(4096)
+       #s.setsockopt(socket.SOL_IP, socket.IP_TTL, ttl)
+       #print("\n\n 2. Node received: ", data.decode('utf-8'), "\n\n")
+       PacketsHandler.PacketHandler(data,address)
 
 
 # --- Thread Beacon Udp Packets --- #
 class ThreadBeacon (threading.Thread):
-   def __init__(self, threadID, name, beacon, port):
+   def __init__(self, threadID, name, beacon, ip, port):
       threading.Thread.__init__(self)
       self.threadID = threadID
       self.name = name
       self.beacon = beacon
       self.port = port
+      self.ip = ip
 
    def run(self):
       print ("Starting " + self.name)
-      SendUdpPacketBroadcastLoop(self.beacon, self.port)
+      SendUdpPacketBroadcastLoop(self.beacon, self.ip,self.port)
 
-def SendUdpPacketBroadcastLoop(beacon,port):
-   bytesToSend         = beacon
-   serverAddressPort   = ('<broadcast>', port)
-   UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,socket.IPPROTO_UDP)
-   UDPClientSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-   UDPClientSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-   UDPClientSocket.settimeout(0.2)
-   while True:
-      UDPClientSocket.sendto(bytesToSend, serverAddressPort)
-      print("Broadcast Beacon Send!")
+def SendUdpPacketBroadcastLoop(beacon,ip,port):
+   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+   print("Do Ctrl+c to exit the program !!")
+   # Let's send data through UDP protocol
+   while True:     
+      s.sendto(beacon, (ip, port))
+      print("\n\n 1. Node Send Beacon: ", beacon, "\n\n")
+      # close the socket
+      print("Beacon Send!")
       time.sleep(int(config['GENERAL']['BeaconSleep']))
 
 
@@ -85,39 +113,38 @@ class ThreadReport (threading.Thread):
       print ("Starting " + self.name)
       SendUdpPacketUnicastLoop(self.port, self.s_address, self.d_address)
 
+
+
+
+
+
 def SendUdpPacketUnicastLoop(port,src,dst):
-   serverAddressPort   = (dst, port)
-   UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,socket.IPPROTO_UDP)
-   UDPClientSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-   UDPClientSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-   UDPClientSocket.settimeout(0.2)
+   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+   print("Do Ctrl+c to exit the program !!")
+   # Let's send data through UDP protocol
    while True:
-      node_variables.list_neighbor
-      pckReort = ReportPacket ( config.get(socket.gethostname(),'NetId'), config['GENERAL']['IpSink'], src, "100", dst, ', '.join(node_variables.list_neighbor) )
-      bytesToSend = pckReort.getBytesFromPackets()
-      UDPClientSocket.sendto(bytesToSend, serverAddressPort)
+      neigh=init_config.GetNeighboors()
+      pckReort = ReportPacket ( config['GENERAL']['NetId'], dst, src, config['GENERAL']['TTL'], dst, ", ".join(neigh))
+      bytesToSend = pckReort.getBytesFromPackets() 
+      s.sendto(bytesToSend, (dst, port))
+      print("\n\n 1. Node Send Report : ", bytesToSend, "\n\n")
+      # close the socket
       print("Unicast Report Send!")
       time.sleep(int(config['GENERAL']['BeaconSleep']))
 
 
+     
+
+  
+
+
 # --- Generic Function For Send Udp Packets --- #
-def SendUdpPacketBroadcast(data,port):
-    bytesToSend         = data
-    serverAddressPort   = ('<broadcast>', port)
-    UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,socket.IPPROTO_UDP)
-    UDPClientSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-    UDPClientSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
-    print("Broadcast Packet Send!")
 
 def SendUdpPacketUnicast(data,address,port):
-    bytesToSend         = data
-    serverAddressPort   = (address, port)
-    UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,socket.IPPROTO_UDP)
-    UDPClientSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-    UDPClientSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    UDPClientSocket.sendto(bytesToSend, serverAddressPort)
-    print("Unicast Packet Send!")
+   s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+   s.sendto(data, (address, port))
+   print("\n\n 1. Packet sent: ", data, "\n\n")
+
 
 
 
@@ -146,3 +173,19 @@ def PrintBasicInfo(NeighborInfo,OtherInfo):
          print(" --- ")
       print("\n")
       time.sleep(int(config['GENERAL']['InfoSleep']))
+
+
+
+
+class ThreadFlusSystem(threading.Thread):
+   def __init__(self, threadID, name):
+      threading.Thread.__init__(self)
+      self.threadID = threadID
+      self.name = name
+
+   def run(self):
+      while True:
+         print("Starting " + self.name)
+         init_config.FlusSystem()
+         time.sleep(int(config['GENERAL']['ScanNetSleep']))
+         
