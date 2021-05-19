@@ -65,11 +65,12 @@ def TypeReport(packet):
 
 
 def TypeData(packet,s):
-    if (packet.Destination==str(config['GENERAL']['IpSink'])and init_config.GetIp(config['GENERAL']['StationInterface'])==str(config['GENERAL']['IpSink'])):
+    #if (packet.Destination==str(config['GENERAL']['IpSink'])and init_config.GetIp(config['GENERAL']['StationInterface'])==str(config['GENERAL']['IpSink'])):
         print("Data Received from: ", s)
         data = packet.getBytesFromPackets()
         #data = packet.getBytesFromPackets()
         #UDP_Socket.SendUdpPacketUnicast(data, config['GENERAL']['IpController'], int(config['GENERAL']['PortController']))
+        UDP_Socket.SendUdpPacketUnicast(data, config['GENERAL']['IpSink'], int(config['GENERAL']['StationInterface']))
         print("Sono Giuseppe"+str(data))
 
 def TypeFunction(packet):
