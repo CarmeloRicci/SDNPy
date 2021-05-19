@@ -65,9 +65,8 @@ def TypeReport(packet):
 
 
 def TypeData(packet,s):
-    print("SONO GIUSEPPE-----------------------------------------------------------------------")
-    #if (packet.Destination==str(config['GENERAL']['IpSink'])and init_config.GetIp(config['GENERAL']['StationInterface'])==str(config['GENERAL']['IpSink'])):
-    print("Data Received from: ", s)
+    if (packet.Destination==str(config['GENERAL']['IpSink'])and init_config.GetIp(config['GENERAL']['StationInterface'])==str(config['GENERAL']['IpSink'])):
+    print("GIUSEPPEEEEEEEEEEEEEEEEE---------------->Data Received from: ", s)
     data = packet.getBytesFromPackets()
     #data = packet.getBytesFromPackets()
     #UDP_Socket.SendUdpPacketUnicast(data, config['GENERAL']['IpController'], int(config['GENERAL']['PortController']))
