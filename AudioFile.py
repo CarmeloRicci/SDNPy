@@ -101,7 +101,7 @@ class ThreadAud (threading.Thread):
                     while not messRCV:
                         if pos == buffSize:  # and val == ('\r').encode():
                             
-                            print("---------->", int.from_bytes(inBuff[0] + inBuff[1] + inBuff[2], "big", signed="True") )
+                            #print("---------->", int.from_bytes(inBuff[0] + inBuff[1] + inBuff[2], "big", signed="True") )
                             #print("---------->",inBuff[0] + inBuff[1] + inBuff[2])
                             #audioSample.extend(inBuff[0] + inBuff[1] + inBuff[2])
                             audioSample.extend(inBuff[0] + inBuff[1] + inBuff[2])
@@ -114,7 +114,7 @@ class ThreadAud (threading.Thread):
                             pos = pos + 1
               
 
-            print("send mic data:", str(audioSample))
+            print("send mic data!")
             pckData = DataPacket(config['GENERAL']['NetId'], config['GENERAL']['IpSink'], init_config.GetIp(
                 config['GENERAL']['StationInterface']), "100", config['GENERAL']['IpSink'], audioSample)
             # pckData="-1--38----192.168.3.1----192.168.3.1-2100----192.168.3.1"+payload
