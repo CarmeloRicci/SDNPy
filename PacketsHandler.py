@@ -51,7 +51,7 @@ def TypeBeacon(packet):
     if (packet.Destination==str(config['GENERAL']['IpSink']) and init_config.GetIp(config['GENERAL']['StationInterface'])==str(config['GENERAL']['IpSink']) ):
 
         #Packets.getPacketFromBytes(data).printLitePacket()
-        print("Beacon Received from: ", packet.Source)
+        #print("Beacon Received from: ", packet.Source)
         data = packet.getBytesFromPackets()
         UDP_Socket.SendUdpPacketUnicast(data, config['GENERAL']['IpController'], int(config['GENERAL']['PortController']))
     
@@ -59,7 +59,7 @@ def TypeBeacon(packet):
 
 def TypeReport(packet):
     if (packet.Destination==str(config['GENERAL']['IpSink'])and init_config.GetIp(config['GENERAL']['StationInterface'])==str(config['GENERAL']['IpSink'])):
-        print("Report Received from: ", packet.Source)
+        #print("Report Received from: ", packet.Source)
         data = packet.getBytesFromPackets()
         UDP_Socket.SendUdpPacketUnicast(data, config['GENERAL']['IpController'], int(config['GENERAL']['PortController']))
 
