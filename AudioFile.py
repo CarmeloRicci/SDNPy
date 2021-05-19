@@ -105,9 +105,6 @@ class ThreadAud (threading.Thread):
                             #print("---------->",inBuff[0] + inBuff[1] + inBuff[2])
                             #audioSample.extend(inBuff[0] + inBuff[1] + inBuff[2])
                             audioSample.extend(inBuff[0] + inBuff[1] + inBuff[2])
-                            print("CIAOOOOOO--------------")
-                            print(str(audioSample))
-                            print("FINE---------------------")
                             messRCV = True
                             pos = 0
                             inBuff = [bytes(0)] * buffSize

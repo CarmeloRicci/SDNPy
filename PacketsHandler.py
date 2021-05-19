@@ -70,7 +70,7 @@ def TypeData(packet,s):
         data = packet.getBytesFromPackets()
         #data = packet.getBytesFromPackets()
         #UDP_Socket.SendUdpPacketUnicast(data, config['GENERAL']['IpController'], int(config['GENERAL']['PortController']))
-        UDP_Socket.SendUdpPacketUnicast(data, config['GENERAL']['IpSink'], int(config['GENERAL']['StationInterface']))
+        UDP_Socket.SendUdpPacketUnicast(data, config['GENERAL']['IpSink'], int(config['GENERAL']['Port']))
         print("Sono Giuseppe"+str(data))
 
 def TypeFunction(packet):
