@@ -94,9 +94,9 @@ class Packets:
         else:
             print("Error Packet Size")
     
- def getPayloadFromPackets(self):
+    def getPayloadFromPackets(self):
         self.fixTheLen()
-        frame8=bytearray()
+        frame8= bytearray()
         if ( (len(self.NetId) == int(config['PACKET']['LenNetId']))  and (len(self.Length) == int(config['PACKET']['LenLength'])) and (len(self.Destination) == int(config['PACKET']['LenDestination'])) and (len(self.Source) == int(config['PACKET']['LenSource'])) and (len(self.Type) == int(config['PACKET']['LenType'])) and (len(self.TTL) == int(config['PACKET']['LenTTL'])) and (len(self.NextHop) == int(config['PACKET']['LenNextHop'])) and (len(self.Payload) <= int(config['PACKET']['LenPayload'])) ) :
             frame1 = bytearray(self.NetId,'utf-8')
             frame2 = bytearray(self.Length,'utf-8')
