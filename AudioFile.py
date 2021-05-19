@@ -121,7 +121,7 @@ class ThreadAud (threading.Thread):
             # pckData=pckData.replace("192.168.3.1-2100",init_config.GetIp(config['GENERAL']['StationInterface'])+"-2100")
             #pckData=pckData.replace("38", str(38+len(payload)))
 
-            UDP_Socket.SendUdpPacketUnicast(pckData.getBytesFromPackets(), config['GENERAL']['IpSink'], int(config['GENERAL']['Port']))
+            UDP_Socket.SendUdpPacketUnicast(pckData.getPayloadFromPackets(), config['GENERAL']['IpSink'], int(config['GENERAL']['Port']))
         
 
             # UDP_Socket.SendUdpPacketUnicast(pckData.getBytesFromPackets(),config['GENERAL']['IpSink'],int(config['GENERAL']['Port']))
