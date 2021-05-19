@@ -110,7 +110,7 @@ class Packets:
             frame6 = bytearray(self.TTL,'utf-8')
             frame7 = bytearray(self.NextHop,'utf-8')
             frame8 = self.Payload
-            
+            print("sono nel Payload"+str(frame8))
     
             frame =frame8
             ##print(frame)
