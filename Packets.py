@@ -8,7 +8,7 @@ import threading
 import node_variables
 from configparser import ConfigParser
 config = ConfigParser()
-config.read('config.ini')
+config.read('/etc/SDNPy-SDNWiMesh/config.ini')
 
 
 class Packets:
@@ -71,10 +71,15 @@ class Packets:
         while frame7.decode("utf-8")[0] == "-":
             frame7 = frame7[1:]
 
-        return cls(frame1.decode("utf-8"), frame2.decode("utf-8"), frame3.decode("utf-8"), frame4.decode("utf-8"), frame5.decode("utf-8"), frame6.decode("utf-8"), frame7.decode("utf-8"), frame8.decode("utf-8") )
+        if isinstance (frame8, str):
+            return cls(frame1.decode("utf-8"), frame2.decode("utf-8"), frame3.decode("utf-8"), frame4.decode("utf-8"), frame5.decode("utf-8"), frame6.decode("utf-8"), frame7.decode("utf-8"), frame8.decode("utf-8") )
+        else:
+            return cls(frame1.decode("utf-8"), frame2.decode("utf-8"), frame3.decode("utf-8"), frame4.decode("utf-8"), frame5.decode("utf-8"), frame6.decode("utf-8"), frame7.decode("utf-8"), frame8)
+       
         
     def getBytesFromPackets(self):
         self.fixTheLen()
+        
         if ( (len(self.NetId) == int(config['PACKET']['LenNetId']))  and (len(self.Length) == int(config['PACKET']['LenLength'])) and (len(self.Destination) == int(config['PACKET']['LenDestination'])) and (len(self.Source) == int(config['PACKET']['LenSource'])) and (len(self.Type) == int(config['PACKET']['LenType'])) and (len(self.TTL) == int(config['PACKET']['LenTTL'])) and (len(self.NextHop) == int(config['PACKET']['LenNextHop'])) and (len(self.Payload) <= int(config['PACKET']['LenPayload'])) ) :
             frame1 = bytearray(self.NetId,'utf-8')
             frame2 = bytearray(self.Length,'utf-8')
@@ -83,9 +88,19 @@ class Packets:
             frame5 = bytearray(self.Type,'utf-8')
             frame6 = bytearray(self.TTL,'utf-8')
             frame7 = bytearray(self.NextHop,'utf-8')
-            frame8 = bytearray(self.Payload,'utf-8')
+            
+            if isinstance (self.Payload, str):
+                frame8 = bytearray(self.Payload,'utf-8')
+            else:
+                frame8=bytearray()
+                frame8.extend(self.Payload)
+
+            
+
+
+          
             frame = frame1 + frame2 + frame3 + frame4 + frame5 + frame6 + frame7 + frame8
-            ##print(frame)
+            print(frame)
             return frame
         else:
             print("Error Packet Size")
@@ -156,18 +171,26 @@ class BeaconPacket(Packets):
     
     def __init__(self,NetId,Destination,Source,TTL,NextHop,Payload):
         #super().__init__(NetId,"",Destination,Source,"0",TTL,NextHop,"Payload BEACON")
-        super().__init__(NetId,"",Destination,Source,"0",TTL,NextHop,Payload)
+        super().__init__(NetId,"",Destination,Source,"0",TTL,NextHop,Payload)  #0 beacon
         super().LengthCalcolator()
 
 class ReportPacket(Packets):
     
     def __init__(self,NetId,Destination,Source,TTL,NextHop,Payload):
-        super().__init__(NetId,"",Destination,Source,"1",TTL,NextHop,Payload)
+        super().__init__(NetId,"",Destination,Source,"1",TTL,NextHop,Payload)  #1 report
         super().LengthCalcolator()
 
 class DataPacket(Packets):
     
     def __init__(self,NetId,Destination,Source,TTL,NextHop,Payload):
-        super().__init__(NetId,"",Destination,Source,"2",TTL,NextHop,"Payload DATA")
+        #super().__init__(NetId,"",Destination,Source,"2",TTL,NextHop,"Payload DATA")  #2 data
+        super().__init__(NetId,"",Destination,Source,"2",TTL,NextHop,Payload)  #2 data
+        super().LengthCalcolator()
+
+
+class FunctionPacket(Packets):    
+    def __init__(self,NetId,Destination,Source,TTL,NextHop,Payload):
+        #super().__init__(NetId,"",Destination,Source,"2",TTL,NextHop,"Payload DATA")  #2 data
+        super().__init__(NetId,"",Destination,Source,"3",TTL,NextHop,Payload)  #2 data
         super().LengthCalcolator()
 
